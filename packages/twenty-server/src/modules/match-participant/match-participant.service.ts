@@ -10,7 +10,9 @@ import { buildSystemAuthContext } from 'src/engine/twenty-orm/utils/build-system
 import { WorkspaceEventEmitter } from 'src/engine/workspace-event-emitter/workspace-event-emitter';
 import { type CalendarEventParticipantWorkspaceEntity } from 'src/modules/calendar/common/standard-objects/calendar-event-participant.workspace-entity';
 import { addPersonEmailFiltersToQueryBuilder } from 'src/modules/match-participant/utils/add-person-email-filters-to-query-builder';
+import { addPersonPhoneFiltersToQueryBuilder } from 'src/modules/match-participant/utils/add-person-phone-filters-to-query-builder';
 import { findPersonByPrimaryOrAdditionalEmail } from 'src/modules/match-participant/utils/find-person-by-primary-or-additional-email';
+import { findPersonByPrimaryOrAdditionalPhone } from 'src/modules/match-participant/utils/find-person-by-primary-or-additional-phone';
 import { type MessageParticipantWorkspaceEntity } from 'src/modules/messaging/common/standard-objects/message-participant.workspace-entity';
 import { type PersonWorkspaceEntity } from 'src/modules/person/standard-objects/person.workspace-entity';
 import { WorkspaceMemberWorkspaceEntity } from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
@@ -118,23 +120,60 @@ export class MatchParticipantService<
         ...new Set(participants.map((participant) => participant.handle)),
       ].filter(isDefined);
 
-      const queryBuilder = addPersonEmailFiltersToQueryBuilder({
-        queryBuilder: personRepository.createQueryBuilder('person'),
-        emails: uniqueParticipantsHandles,
-      });
-
-      const people = await queryBuilder
-        .orderBy('person.createdAt', 'ASC')
-        .getMany();
-
-      const workspaceMembers = await workspaceMemberRepository.find(
-        {
-          where: {
-            userEmail: Any(uniqueParticipantsHandles),
-          },
-        },
-        transactionManager,
+      // Separate handles into emails and phone numbers.
+      // Phone numbers (E.164) do not contain `@`, emails do.
+      const emailHandles = uniqueParticipantsHandles.filter((handle) =>
+        handle.includes('@'),
       );
+      const phoneHandles = uniqueParticipantsHandles.filter(
+        (handle) => !handle.includes('@'),
+      );
+
+      // ── Person matching by email ─────────────────────────────────
+
+      let emailPeople: PersonWorkspaceEntity[] = [];
+
+      if (emailHandles.length > 0) {
+        const emailQueryBuilder = addPersonEmailFiltersToQueryBuilder({
+          queryBuilder: personRepository.createQueryBuilder('person'),
+          emails: emailHandles,
+        });
+
+        emailPeople = await emailQueryBuilder
+          .orderBy('person.createdAt', 'ASC')
+          .getMany();
+      }
+
+      // ── Person matching by phone ─────────────────────────────────
+
+      let phonePeople: PersonWorkspaceEntity[] = [];
+
+      if (phoneHandles.length > 0) {
+        const phoneQueryBuilder = addPersonPhoneFiltersToQueryBuilder({
+          queryBuilder: personRepository.createQueryBuilder('person'),
+          phones: phoneHandles,
+        });
+
+        phonePeople = await phoneQueryBuilder
+          .orderBy('person.createdAt', 'ASC')
+          .getMany();
+      }
+
+      // ── Workspace member matching (email only) ───────────────────
+
+      const workspaceMembers =
+        emailHandles.length > 0
+          ? await workspaceMemberRepository.find(
+              {
+                where: {
+                  userEmail: Any(emailHandles),
+                },
+              },
+              transactionManager,
+            )
+          : [];
+
+      // ── Participant update ───────────────────────────────────────
 
       const partipantsToBeUpdated = participants
         .map((participant) => ({
@@ -142,23 +181,39 @@ export class MatchParticipantService<
           handle: participant.handle ?? '',
         }))
         .map((participant) => {
-          const person = findPersonByPrimaryOrAdditionalEmail({
-            people,
-            email: participant.handle,
-          });
+          const isPhoneHandle = !participant.handle.includes('@');
 
-          const workspaceMember = workspaceMembers.find(
-            (workspaceMember) =>
-              workspaceMember.userEmail === participant.handle,
-          );
+          const person = isPhoneHandle
+            ? findPersonByPrimaryOrAdditionalPhone({
+                people: phonePeople,
+                phone: participant.handle,
+              })
+            : findPersonByPrimaryOrAdditionalEmail({
+                people: emailPeople,
+                email: participant.handle,
+              });
 
+          // Workspace member matching is only relevant for email
+          // handles; phone handles skip workspace member lookup.
+          const workspaceMember = isPhoneHandle
+            ? undefined
+            : workspaceMembers.find(
+                (workspaceMember) =>
+                  workspaceMember.userEmail === participant.handle,
+              );
+
+          // Phone participants match with personOnly implicitly:
+          // they have no workspace member to match against, so only
+          // person matching applies regardless of the `matchWith` flag.
           const shouldMatchWithPerson =
             matchWith === 'workspaceMemberAndPerson' ||
-            matchWith === 'personOnly';
+            matchWith === 'personOnly' ||
+            isPhoneHandle;
 
           const shouldMatchWithWorkspaceMember =
-            matchWith === 'workspaceMemberAndPerson' ||
-            matchWith === 'workspaceMemberOnly';
+            !isPhoneHandle &&
+            (matchWith === 'workspaceMemberAndPerson' ||
+              matchWith === 'workspaceMemberOnly');
 
           const newParticipant = {
             ...participant,

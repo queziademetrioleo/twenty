@@ -11,7 +11,7 @@ import { useLingui } from '@lingui/react/macro';
 import { useContext } from 'react';
 import { ConnectedAccountProvider, SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
-import { IconAt, IconGoogle, IconMicrosoft } from 'twenty-ui/icon';
+import { IconAt, IconBrandWhatsapp, IconGoogle, IconMicrosoft } from 'twenty-ui/icon';
 import { UndecoratedLink } from 'twenty-ui/navigation';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
@@ -74,6 +74,15 @@ export const SettingsAccountsListEmptyStateCard = () => {
           />
         </UndecoratedLink>
       )}
+
+      <UndecoratedLink
+        to={getSettingsPath(SettingsPath.NewWhatsappConnection)}
+      >
+        <SettingsCard
+          Icon={<IconBrandWhatsapp size={theme.icon.size.md} />}
+          title={t`Connect via WhatsApp Cloud API`}
+        />
+      </UndecoratedLink>
     </StyledCardsContainer>
   );
 };

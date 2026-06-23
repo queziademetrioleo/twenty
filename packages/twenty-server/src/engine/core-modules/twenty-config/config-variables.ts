@@ -210,6 +210,34 @@ export class ConfigVariables {
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
     description:
+      'Enable or disable the WhatsApp Business Cloud API messaging integration',
+    type: ConfigVariableType.BOOLEAN,
+  })
+  IS_WHATSAPP_MESSAGING_ENABLED = false;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    description:
+      'Enable or disable the connection test when saving WhatsApp accounts',
+    type: ConfigVariableType.BOOLEAN,
+  })
+  @IsOptional()
+  IS_WHATSAPP_CONNECTION_TEST_ENABLED = true;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    description:
+      'App Secret from the Meta app used to verify the signature of inbound WhatsApp webhooks (HMAC SHA-256)',
+    type: ConfigVariableType.STRING,
+    isEnvOnly: true,
+    isSensitive: true,
+  })
+  @IsOptional()
+  WHATSAPP_APP_SECRET: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    description:
       'Enable or disable the connection test when saving IMAP/SMTP/CALDAV accounts',
     type: ConfigVariableType.BOOLEAN,
   })

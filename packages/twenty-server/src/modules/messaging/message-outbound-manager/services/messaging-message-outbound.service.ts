@@ -8,6 +8,7 @@ import { EmailGroupMessageOutboundService } from 'src/modules/messaging/message-
 import { GmailMessageOutboundService } from 'src/modules/messaging/message-outbound-manager/drivers/gmail/services/gmail-message-outbound.service';
 import { ImapSmtpMessageOutboundService } from 'src/modules/messaging/message-outbound-manager/drivers/imap/services/imap-smtp-message-outbound.service';
 import { MicrosoftMessageOutboundService } from 'src/modules/messaging/message-outbound-manager/drivers/microsoft/services/microsoft-message-outbound.service';
+import { WhatsappMessageOutboundService } from 'src/modules/messaging/message-outbound-manager/drivers/whatsapp/services/whatsapp-message-outbound.service';
 import { SendMessageInput } from 'src/modules/messaging/message-outbound-manager/types/send-message-input.type';
 import { type SendMessageResult } from 'src/modules/messaging/message-outbound-manager/types/send-message-result.type';
 
@@ -18,6 +19,7 @@ export class MessagingMessageOutboundService {
     private readonly microsoftMessageOutboundService: MicrosoftMessageOutboundService,
     private readonly imapSmtpMessageOutboundService: ImapSmtpMessageOutboundService,
     private readonly emailGroupMessageOutboundService: EmailGroupMessageOutboundService,
+    private readonly whatsappMessageOutboundService: WhatsappMessageOutboundService,
   ) {}
 
   public async sendMessage(
@@ -51,6 +53,11 @@ export class MessagingMessageOutboundService {
         throw new Error(
           `Provider ${connectedAccount.provider} does not support sending messages`,
         );
+      case ConnectedAccountProvider.WHATSAPP:
+        return this.whatsappMessageOutboundService.sendMessage(
+          sendMessageInput,
+          connectedAccount,
+        );
       default:
         assertUnreachable(
           connectedAccount.provider,
@@ -83,6 +90,11 @@ export class MessagingMessageOutboundService {
       case ConnectedAccountProvider.OIDC:
       case ConnectedAccountProvider.SAML:
       case ConnectedAccountProvider.APP:
+        throw new Error(
+          `Provider ${connectedAccount.provider} does not support creating drafts`,
+        );
+      case ConnectedAccountProvider.WHATSAPP:
+        // WhatsApp has no draft concept.
         throw new Error(
           `Provider ${connectedAccount.provider} does not support creating drafts`,
         );

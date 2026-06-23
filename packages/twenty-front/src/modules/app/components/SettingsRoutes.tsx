@@ -60,6 +60,22 @@ const SettingsEditImapSmtpCaldavConnection = lazy(() =>
   ),
 );
 
+const SettingsAccountsWhatsappConnection = lazy(() =>
+  import('@/settings/accounts/components/SettingsAccountsWhatsappConnection').then(
+    (module) => ({
+      default: module.SettingsAccountsWhatsappConnection,
+    }),
+  ),
+);
+
+const SettingsAccountsEditWhatsappConnection = lazy(() =>
+  import('@/settings/accounts/components/SettingsAccountsWhatsappConnection').then(
+    (module) => ({
+      default: module.SettingsAccountsWhatsappConnection,
+    }),
+  ),
+);
+
 const SettingsNewEmailGroupChannel = lazy(() =>
   import('@/settings/accounts/components/SettingsAccountsNewEmailGroupChannel').then(
     (module) => ({
@@ -634,6 +650,14 @@ export const SettingsRoutes = ({ isAdminPageEnabled }: SettingsRoutesProps) => (
         <Route
           path={SettingsPath.EditImapSmtpCaldavConnection}
           element={<SettingsEditImapSmtpCaldavConnection />}
+        />
+        <Route
+          path={SettingsPath.NewWhatsappConnection}
+          element={<SettingsAccountsWhatsappConnection />}
+        />
+        <Route
+          path={SettingsPath.EditWhatsappConnection}
+          element={<SettingsAccountsEditWhatsappConnection />}
         />
       </Route>
       <Route

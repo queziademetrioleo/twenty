@@ -3,6 +3,7 @@ import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import {
   IconAt,
+  IconBrandWhatsapp,
   IconCalendarEvent,
   type IconComponent,
   type IconComponentProps,
@@ -70,6 +71,8 @@ const getIconForProvider = (account: ConnectedAccount): IconComponent => {
       return IconGoogle;
     case ConnectedAccountProvider.MICROSOFT:
       return IconMicrosoft;
+    case ConnectedAccountProvider.WHATSAPP:
+      return IconBrandWhatsapp;
     default:
       return IconMail;
   }

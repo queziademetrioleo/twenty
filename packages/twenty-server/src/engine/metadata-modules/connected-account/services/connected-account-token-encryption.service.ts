@@ -8,6 +8,10 @@ import {
   type PlaintextConnectionParameters,
   type PlaintextImapSmtpCaldavParams,
 } from 'src/engine/core-modules/imap-smtp-caldav-connection/types/imap-smtp-caldav-connection.type';
+import {
+  type EncryptedWhatsappConnectionParameters,
+  type PlaintextWhatsappConnectionParameters,
+} from 'src/engine/core-modules/whatsapp-connection/types/whatsapp-connection.type';
 import { type EncryptedString } from 'src/engine/core-modules/secret-encryption/branded-strings/encrypted-string.type';
 import { type PlaintextString } from 'src/engine/core-modules/secret-encryption/branded-strings/plaintext-string.type';
 import { SECRET_ENCRYPTION_ENVELOPE_PREFIX } from 'src/engine/core-modules/secret-encryption/constants/secret-encryption.constant';
@@ -179,6 +183,46 @@ export class ConnectedAccountTokenEncryptionService {
       ...protocolParams,
       password: this.decrypt({
         ciphertext: protocolParams.password,
+        workspaceId,
+      }),
+    };
+  }
+
+  encryptWhatsappConnectionParameters({
+    connectionParameters,
+    workspaceId,
+  }: {
+    connectionParameters: PlaintextWhatsappConnectionParameters;
+    workspaceId: string;
+  }): EncryptedWhatsappConnectionParameters {
+    return {
+      ...connectionParameters,
+      accessToken: this.encrypt({
+        plaintext: connectionParameters.accessToken,
+        workspaceId,
+      }),
+      verifyToken: this.encrypt({
+        plaintext: connectionParameters.verifyToken,
+        workspaceId,
+      }),
+    };
+  }
+
+  decryptWhatsappConnectionParameters({
+    connectionParameters,
+    workspaceId,
+  }: {
+    connectionParameters: EncryptedWhatsappConnectionParameters;
+    workspaceId: string;
+  }): PlaintextWhatsappConnectionParameters {
+    return {
+      ...connectionParameters,
+      accessToken: this.decrypt({
+        ciphertext: connectionParameters.accessToken,
+        workspaceId,
+      }),
+      verifyToken: this.decrypt({
+        ciphertext: connectionParameters.verifyToken,
         workspaceId,
       }),
     };

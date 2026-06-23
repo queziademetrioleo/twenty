@@ -45,6 +45,7 @@ export class EmailAliasManagerService {
       case ConnectedAccountProvider.SAML:
       case ConnectedAccountProvider.EMAIL_GROUP:
       case ConnectedAccountProvider.APP:
+      case ConnectedAccountProvider.WHATSAPP:
         handleAliases = [];
         break;
       default:

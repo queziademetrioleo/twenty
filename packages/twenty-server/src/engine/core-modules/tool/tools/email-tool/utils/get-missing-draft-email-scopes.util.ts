@@ -29,6 +29,7 @@ export const getMissingDraftEmailScopes = (connectedAccount: {
     case ConnectedAccountProvider.APP:
     case ConnectedAccountProvider.OIDC:
     case ConnectedAccountProvider.SAML:
+    case ConnectedAccountProvider.WHATSAPP:
       return [];
     default:
       return assertUnreachable(

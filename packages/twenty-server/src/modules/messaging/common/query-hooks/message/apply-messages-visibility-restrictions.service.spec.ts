@@ -29,6 +29,7 @@ const createMockMessage = (
   messageCampaign: null,
   messageCampaignId: null,
   deliveryStatus: null,
+  media: null,
   deletedAt: null,
   createdAt: '2024-03-20T09:00:00Z',
   updatedAt: '2024-03-20T09:00:00Z',

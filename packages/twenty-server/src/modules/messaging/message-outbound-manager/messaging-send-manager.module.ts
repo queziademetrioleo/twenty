@@ -6,6 +6,8 @@ import { EmailingModule } from 'src/modules/emailing/emailing.module';
 import { MessageChannelEntity } from 'src/engine/metadata-modules/message-channel/entities/message-channel.entity';
 import { MessageFolderEntity } from 'src/engine/metadata-modules/message-folder/entities/message-folder.entity';
 import { provideWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/provide-workspace-scoped-repository';
+import { ConnectedAccountTokenEncryptionModule } from 'src/engine/metadata-modules/connected-account/services/connected-account-token-encryption.module';
+import { SecureHttpClientModule } from 'src/engine/core-modules/secure-http-client/secure-http-client.module';
 import { OAuth2ClientManagerModule } from 'src/modules/connected-account/oauth2-client-manager/oauth2-client-manager.module';
 import { MessagingIMAPDriverModule } from 'src/modules/messaging/message-import-manager/drivers/imap/messaging-imap-driver.module';
 import { MessagingSmtpDriverModule } from 'src/modules/messaging/message-import-manager/drivers/smtp/messaging-smtp-driver.module';
@@ -14,12 +16,15 @@ import { EmailGroupMessageOutboundService } from 'src/modules/messaging/message-
 import { GmailMessageOutboundService } from 'src/modules/messaging/message-outbound-manager/drivers/gmail/services/gmail-message-outbound.service';
 import { ImapSmtpMessageOutboundService } from 'src/modules/messaging/message-outbound-manager/drivers/imap/services/imap-smtp-message-outbound.service';
 import { MicrosoftMessageOutboundService } from 'src/modules/messaging/message-outbound-manager/drivers/microsoft/services/microsoft-message-outbound.service';
+import { WhatsappMessageOutboundService } from 'src/modules/messaging/message-outbound-manager/drivers/whatsapp/services/whatsapp-message-outbound.service';
 import { MessagingMessageOutboundService } from 'src/modules/messaging/message-outbound-manager/services/messaging-message-outbound.service';
 import { SendEmailService } from 'src/modules/messaging/message-outbound-manager/services/send-email.service';
 import { SentMessagePersistenceService } from 'src/modules/messaging/message-outbound-manager/services/sent-message-persistence.service';
 
 @Module({
   imports: [
+    ConnectedAccountTokenEncryptionModule,
+    SecureHttpClientModule,
     OAuth2ClientManagerModule,
     MessagingIMAPDriverModule,
     MessagingSmtpDriverModule,
@@ -36,6 +41,7 @@ import { SentMessagePersistenceService } from 'src/modules/messaging/message-out
     MicrosoftMessageOutboundService,
     ImapSmtpMessageOutboundService,
     EmailGroupMessageOutboundService,
+    WhatsappMessageOutboundService,
     MessagingMessageOutboundService,
     SendEmailService,
     SentMessagePersistenceService,

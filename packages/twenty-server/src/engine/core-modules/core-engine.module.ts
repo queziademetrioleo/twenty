@@ -61,6 +61,7 @@ import { TwentyConfigModule } from 'src/engine/core-modules/twenty-config/twenty
 import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
 import { UsageModule } from 'src/engine/core-modules/usage/usage.module';
 import { UserModule } from 'src/engine/core-modules/user/user.module';
+import { WhatsappConnectionModule } from 'src/engine/core-modules/whatsapp-connection/whatsapp-connection.module';
 import { WorkflowApiModule } from 'src/engine/core-modules/workflow/workflow-api.module';
 import { WorkspaceInvitationModule } from 'src/engine/core-modules/workspace-invitation/workspace-invitation.module';
 import { WorkspaceModule } from 'src/engine/core-modules/workspace/workspace.module';
@@ -128,6 +129,7 @@ import { FileModule } from './file/file.module';
     GeoMapModule,
     SubscriptionsModule,
     ImapSmtpCaldavModule,
+    WhatsappConnectionModule,
     ChannelSyncModule,
     SendEmailModule,
     FileStorageModule.forRoot(),
@@ -182,6 +184,7 @@ import { FileModule } from './file/file.module';
     WorkspaceInvitationModule,
     WorkspaceSSOModule,
     ImapSmtpCaldavModule,
+    WhatsappConnectionModule,
   ],
 })
 export class CoreEngineModule {}

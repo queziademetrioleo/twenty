@@ -1480,6 +1480,9 @@ export const STANDARD_OBJECTS = {
       deliveryStatus: {
         universalIdentifier: '209254fa-2b89-429d-a72a-c401c4bd5a78',
       },
+      media: {
+        universalIdentifier: '20202020-a7b1-4e3c-9d2f-8c6e5f4a3b2d',
+      },
       createdBy: {
         universalIdentifier: '6e52bde4-ed41-4462-aa70-121e496270b4',
       },

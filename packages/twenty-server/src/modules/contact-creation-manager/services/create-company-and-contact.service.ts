@@ -28,6 +28,7 @@ import { getDomainNameFromHandle } from 'src/modules/contact-creation-manager/ut
 import { getFirstNameAndLastNameFromHandleAndDisplayName } from 'src/modules/contact-creation-manager/utils/get-first-name-and-last-name-from-handle-and-display-name.util';
 import { getUniqueContactsAndHandles } from 'src/modules/contact-creation-manager/utils/get-unique-contacts-and-handles.util';
 import { addPersonEmailFiltersToQueryBuilder } from 'src/modules/match-participant/utils/add-person-email-filters-to-query-builder';
+import { addPersonPhoneFiltersToQueryBuilder } from 'src/modules/match-participant/utils/add-person-phone-filters-to-query-builder';
 import { PersonWorkspaceEntity } from 'src/modules/person/standard-objects/person.workspace-entity';
 import { WorkspaceMemberWorkspaceEntity } from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
 import { computeDisplayName } from 'src/utils/compute-display-name';
@@ -100,15 +101,55 @@ export class CreateCompanyAndPersonService {
           return [];
         }
 
-        const queryBuilder = addPersonEmailFiltersToQueryBuilder({
-          queryBuilder: personRepository.createQueryBuilder('person'),
-          emails: uniqueHandles,
-        });
+        // Split handles into emails and phone numbers so we can query
+        // both the emails and phones composite columns on Person.
+        const emailHandles = uniqueHandles.filter((handle) =>
+          handle.includes('@'),
+        );
+        const phoneHandles = uniqueHandles.filter(
+          (handle) => !handle.includes('@'),
+        );
 
-        const alreadyCreatedPeople = await queryBuilder
-          .orderBy('person.createdAt', 'ASC')
-          .withDeleted()
-          .getMany();
+        let alreadyCreatedPeople: PersonWorkspaceEntity[] = [];
+
+        if (emailHandles.length > 0) {
+          const emailQueryBuilder = addPersonEmailFiltersToQueryBuilder({
+            queryBuilder: personRepository.createQueryBuilder('person'),
+            emails: emailHandles,
+          });
+
+          const emailPeople = await emailQueryBuilder
+            .orderBy('person.createdAt', 'ASC')
+            .withDeleted()
+            .getMany();
+
+          alreadyCreatedPeople.push(...emailPeople);
+        }
+
+        if (phoneHandles.length > 0) {
+          const phoneQueryBuilder = addPersonPhoneFiltersToQueryBuilder({
+            queryBuilder: personRepository.createQueryBuilder('person'),
+            phones: phoneHandles,
+          });
+
+          const phonePeople = await phoneQueryBuilder
+            .orderBy('person.createdAt', 'ASC')
+            .withDeleted()
+            .getMany();
+
+          // Avoid duplicates when a person is matched by both email
+          // and phone (unlikely but guard against it).
+          const existingIds = new Set(
+            alreadyCreatedPeople.map((p) => p.id),
+          );
+
+          for (const person of phonePeople) {
+            if (!existingIds.has(person.id)) {
+              alreadyCreatedPeople.push(person);
+              existingIds.add(person.id);
+            }
+          }
+        }
 
         const {
           contactsThatNeedPersonCreate,
@@ -242,9 +283,57 @@ export class CreateCompanyAndPersonService {
     >();
 
     for (const contact of uniqueContacts) {
-      if (!contact.handle.includes('@')) {
+      const isPhoneHandle = !contact.handle.includes('@');
+
+      // ── Phone handle: match by phone number ────────────────────
+
+      if (isPhoneHandle) {
+        const existingPersonOnPrimaryPhone = alreadyCreatedPeople.find(
+          (person) => {
+            return (
+              isNonEmptyString(person.phones?.primaryPhoneNumber) &&
+              person.phones.primaryPhoneNumber.toLowerCase() ===
+                contact.handle.toLowerCase()
+            );
+          },
+        );
+
+        if (isDefined(existingPersonOnPrimaryPhone)) {
+          shouldCreateOrRestorePeopleByHandleMap.set(
+            contact.handle.toLowerCase(),
+            {
+              existingPerson: existingPersonOnPrimaryPhone,
+            },
+          );
+          continue;
+        }
+
+        const existingPersonOnAdditionalPhones = alreadyCreatedPeople.find(
+          (person) => {
+            return (
+              Array.isArray(person.phones?.additionalPhones) &&
+              person.phones.additionalPhones.some(
+                (phone) =>
+                  phone.number?.toLowerCase() ===
+                  contact.handle.toLowerCase(),
+              )
+            );
+          },
+        );
+
+        if (isDefined(existingPersonOnAdditionalPhones)) {
+          shouldCreateOrRestorePeopleByHandleMap.set(
+            contact.handle.toLowerCase(),
+            {
+              existingPerson: existingPersonOnAdditionalPhones,
+            },
+          );
+        }
+
         continue;
       }
+
+      // ── Email handle: match by email ───────────────────────────
 
       const existingPersonOnPrimaryEmail = alreadyCreatedPeople.find(
         (person) => {
@@ -277,11 +366,14 @@ export class CreateCompanyAndPersonService {
         },
       );
 
-      if (!isDefined(existingPersonOnAdditionalEmails)) continue;
-
-      shouldCreateOrRestorePeopleByHandleMap.set(contact.handle.toLowerCase(), {
-        existingPerson: existingPersonOnAdditionalEmails,
-      });
+      if (isDefined(existingPersonOnAdditionalEmails)) {
+        shouldCreateOrRestorePeopleByHandleMap.set(
+          contact.handle.toLowerCase(),
+          {
+            existingPerson: existingPersonOnAdditionalEmails,
+          },
+        );
+      }
     }
 
     const contactsThatNeedPersonCreate = uniqueContacts.filter(

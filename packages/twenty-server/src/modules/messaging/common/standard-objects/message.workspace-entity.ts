@@ -1,5 +1,6 @@
 import { FieldMetadataType } from 'twenty-shared/types';
 
+import { type FileOutput } from 'src/engine/api/common/common-args-processors/data-arg-processor/types/file-item.type';
 import { BaseWorkspaceEntity } from 'src/engine/twenty-orm/base.workspace-entity';
 import { type FieldTypeAndNameMetadata } from 'src/engine/workspace-manager/utils/get-ts-vector-column-expression.util';
 import { type EntityRelation } from 'src/engine/workspace-manager/workspace-migration/types/entity-relation.interface';
@@ -28,4 +29,5 @@ export class MessageWorkspaceEntity extends BaseWorkspaceEntity {
   messageCampaign: EntityRelation<MessageCampaignWorkspaceEntity> | null;
   messageCampaignId: string | null;
   deliveryStatus: string | null;
+  media: FileOutput[] | null;
 }

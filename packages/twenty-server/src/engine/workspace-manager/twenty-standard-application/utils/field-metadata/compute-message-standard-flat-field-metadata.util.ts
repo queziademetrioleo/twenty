@@ -424,4 +424,21 @@ export const buildMessageStandardFlatFieldMetadatas = ({
     twentyStandardApplicationId,
     now,
   }),
+  media: createStandardFieldFlatMetadata({
+    objectName,
+    workspaceId,
+    context: {
+      fieldName: 'media',
+      type: FieldMetadataType.FILES,
+      label: i18nLabel(msg`Media`),
+      description: i18nLabel(msg`Media attachments (images, audio, video, documents, stickers)`),
+      icon: 'IconFile',
+      isNullable: true,
+      isUIEditable: false,
+    },
+    standardObjectMetadataRelatedEntityIds,
+    dependencyFlatEntityMaps,
+    twentyStandardApplicationId,
+    now,
+  }),
 });

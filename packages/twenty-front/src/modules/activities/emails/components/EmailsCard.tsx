@@ -5,6 +5,7 @@ import { ActivityList } from '@/activities/components/ActivityList';
 import { CustomResolverFetchMoreLoader } from '@/activities/components/CustomResolverFetchMoreLoader';
 import { SkeletonLoader } from '@/activities/components/SkeletonLoader';
 import { ComposeEmailButton } from '@/activities/emails/components/ComposeEmailButton';
+import { WhatsAppComposeButton } from '@/activities/messages/components/WhatsAppComposeButton';
 import { EmailThreadPreview } from '@/activities/emails/components/EmailThreadPreview';
 import { EmptyInboxPlaceholder } from '@/activities/emails/components/EmptyInboxPlaceholder';
 import { TIMELINE_THREADS_DEFAULT_PAGE_SIZE } from '@/activities/emails/constants/Messaging';
@@ -107,6 +108,7 @@ export const EmailsCard = () => {
             fontColor={H1TitleFontColor.Primary}
           />
           <ComposeEmailButton />
+          <WhatsAppComposeButton />
         </StyledHeaderRow>
         {!firstQueryLoading && (
           <ActivityList>

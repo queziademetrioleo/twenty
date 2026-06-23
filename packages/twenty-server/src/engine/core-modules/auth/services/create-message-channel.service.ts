@@ -20,6 +20,7 @@ export type CreateMessageChannelInput = {
   handle: string;
   messageVisibility?: MessageChannelVisibility;
   skipMessageChannelConfiguration?: boolean;
+  messageChannelType?: MessageChannelType;
   transactionManager: EntityManager;
 };
 
@@ -38,6 +39,7 @@ export class CreateMessageChannelService {
       handle,
       messageVisibility,
       skipMessageChannelConfiguration,
+      messageChannelType = MessageChannelType.EMAIL,
       transactionManager,
     } = input;
 
@@ -52,7 +54,7 @@ export class CreateMessageChannelService {
         await messageChannelRepo.save({
           id: newMessageChannelId,
           connectedAccountId,
-          type: MessageChannelType.EMAIL,
+          type: messageChannelType,
           handle,
           visibility:
             messageVisibility || MessageChannelVisibility.SHARE_EVERYTHING,

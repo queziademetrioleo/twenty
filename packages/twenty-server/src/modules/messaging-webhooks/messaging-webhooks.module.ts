@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { EmailingDomainModule } from 'src/engine/core-modules/emailing-domain/emailing-domain.module';
 import { EmailingModule } from 'src/modules/emailing/emailing.module';
@@ -11,10 +12,22 @@ import { SesOutboundSuppressionHandlerService } from 'src/modules/messaging-webh
 import { SesOutboundWebhookRouterService } from 'src/modules/messaging-webhooks/services/ses-outbound-webhook-router.service';
 import { SnsSignatureVerifierService } from 'src/modules/messaging-webhooks/services/sns-signature-verifier.service';
 import { SnsSubscriptionConfirmerService } from 'src/modules/messaging-webhooks/services/sns-subscription-confirmer.service';
+import { WhatsappInboundWebhookHandlerService } from 'src/modules/messaging-webhooks/services/whatsapp-inbound-webhook-handler.service';
 import { TwentyConfigModule } from 'src/engine/core-modules/twenty-config/twenty-config.module';
+import { ConnectedAccountTokenEncryptionModule } from 'src/engine/metadata-modules/connected-account/services/connected-account-token-encryption.module';
+import { ConnectedAccountEntity } from 'src/engine/metadata-modules/connected-account/entities/connected-account.entity';
+import { MessageChannelEntity } from 'src/engine/metadata-modules/message-channel/entities/message-channel.entity';
+import { MessagingImportManagerModule } from 'src/modules/messaging/message-import-manager/messaging-import-manager.module';
 
 @Module({
-  imports: [TwentyConfigModule, EmailingDomainModule, EmailingModule],
+  imports: [
+    TwentyConfigModule,
+    ConnectedAccountTokenEncryptionModule,
+    TypeOrmModule.forFeature([ConnectedAccountEntity, MessageChannelEntity]),
+    EmailingDomainModule,
+    EmailingModule,
+    MessagingImportManagerModule,
+  ],
   controllers: [MessagingWebhooksController],
   providers: [
     SnsSignatureVerifierService,
@@ -25,6 +38,7 @@ import { TwentyConfigModule } from 'src/engine/core-modules/twenty-config/twenty
     SesOutboundSuppressionHandlerService,
     SesInboundWebhookRouterService,
     SesOutboundWebhookRouterService,
+    WhatsappInboundWebhookHandlerService,
   ],
 })
 export class MessagingWebhooksModule {}

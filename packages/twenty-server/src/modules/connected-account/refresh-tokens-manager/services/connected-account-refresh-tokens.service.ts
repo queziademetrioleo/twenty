@@ -170,6 +170,7 @@ export class ConnectedAccountRefreshTokensService {
       case ConnectedAccountProvider.OIDC:
       case ConnectedAccountProvider.SAML:
       case ConnectedAccountProvider.EMAIL_GROUP:
+      case ConnectedAccountProvider.WHATSAPP:
         return true;
       default:
         return assertUnreachable(
@@ -203,6 +204,7 @@ export class ConnectedAccountRefreshTokensService {
         case ConnectedAccountProvider.OIDC:
         case ConnectedAccountProvider.SAML:
         case ConnectedAccountProvider.EMAIL_GROUP:
+        case ConnectedAccountProvider.WHATSAPP:
           throw new ConnectedAccountRefreshAccessTokenException(
             `Token refresh is not supported for ${connectedAccount.provider} provider for connected account ${connectedAccount.id} in workspace ${workspaceId}`,
             ConnectedAccountRefreshAccessTokenExceptionCode.PROVIDER_NOT_SUPPORTED,
