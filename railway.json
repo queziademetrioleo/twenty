@@ -1,6 +1,5 @@
 {
   "build": {
-    "builder": "DOCKERFILE",
-    "dockerfilePath": "packages/twenty-docker/twenty/Dockerfile"
+    "builder": "DOCKERFILE"
   }
 }
