@@ -2,10 +2,9 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "packages/twenty-docker/twenty/Dockerfile"
+    "dockerfilePath": "Dockerfile.railway"
   },
   "deploy": {
-    "healthcheckPath": "/healthz",
     "sleepApplication": false
   }
 }
